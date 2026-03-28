@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% set active_page = "skills" %}
+
+{% block title %}Open Claw - Skill History{% endblock %}
+
+{% block sidebar_primary_action %}
+  <a
+    class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1c8576] to-[#d97721] py-3 font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-90"
+    href="{{ url_for('skill_page', skill_slug=skill_slug) }}"
+  >
+    <span class="material-symbols-outlined">arrow_back</span>
+    <span class="font-mono text-xs" data-i18n="history.backToCockpit">Back to cockpit</span>
+  </a>
+{% endblock %}
+
+{% block header_search %}
+  <div class="flex flex-col">
+    <div class="mb-1 flex items-center gap-2 font-mono text-[11px] text-on-surface-variant">
+      <a class="transition-colors hover:text-slate-100" href="{{ url_for('index') }}#skills-grid" data-i18n="nav.skills">Skills</a>
+      <span class="material-symbols-outlined text-xs">chevron_right</span>
+      <a class="text-secondary transition-colors hover:text-slate-100" href="{{ url_for('skill_page', skill_slug=skill_slug) }}">{{ skill_slug }}</a>
+      <span class="material-symbols-outlined text-xs">chevron_right</span>
+      <span data-i18n="history.label">History</span>
+    </div>
+    <h2 class="text-xl font-bold tracking-tight text-slate-100 lg:text-2xl">
+      <span data-i18n="history.timeline">Timeline</span>
+      <span class="ml-2 text-sm font-normal text-on-surface-variant/60" id="historySkillRoot"></span>
+    </h2>
+  </div>
+{% endblock %}
+
+{% block header_actions %}
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="dashboard-status-pill" id="historyStatusPill" data-i18n="history.loadingHistory">Loading history</div>
+    <a
+      class="dashboard-outline-button rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      href="{{ url_for('skill_page', skill_slug=skill_slug) }}"
+      data-i18n="action.openCockpit"
+    >
+      Open cockpit
+    </a>
+    <button
+      class="dashboard-outline-button rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      id="refreshHistoryPageButton"
+      type="button"
+      data-i18n="action.refresh"
+    >
+      Refresh
+    </button>
+    <button
+      class="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2.5 text-sm font-bold text-on-primary shadow-lg shadow-primary/10 transition-all hover:brightness-110"
+      id="restoreRevisionButton"
+      type="button"
+      data-i18n="action.restoreRevision"
+    >
+      Restore revision
+    </button>
+  </div>
+{% endblock %}
+
+{% block page_content %}
+  <section class="mb-6 rounded-xl border border-outline-variant/10 bg-surface-container px-5 py-4 shadow-[0_0_40px_rgba(192,193,255,0.03)]">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary" data-i18n="history.timeline">Timeline</p>
+        <p class="max-w-3xl text-sm leading-7 text-on-surface-variant" id="historyBanner">
+          The timeline below represents the local working copy of the skill. Restoring a revision creates a new local revision and does not publish changes automatically.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-on-surface-variant">
+        <span class="rounded-full border border-outline-variant/10 bg-surface-container-high px-3 py-1" id="historyRevisionBadge" data-i18n="history.noRevision">No revision</span>
+        <span class="rounded-full border border-outline-variant/10 bg-surface-container-high px-3 py-1" id="historyCompareBadge" data-i18n="history.noComparison">No comparison</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="history-layout">
+    <aside class="history-timeline-pane panel">
+      <div class="history-pane-head">
+        <div>
+          <p class="eyebrow" data-i18n="history.timeline">Timeline</p>
+          <h3 data-i18n="history.localRevisions">Local revisions</h3>
+        </div>
+      </div>
+      <div class="history-timeline-list" id="revisionTimeline"></div>
+    </aside>
+
+    <section class="history-detail-pane panel">
+      <div class="history-pane-head">
+        <div>
+          <p class="eyebrow" data-i18n="history.snapshot">Snapshot</p>
+          <h3 id="revisionTitle" data-i18n="history.selectRevision">Select a revision</h3>
+          <p class="muted-copy" id="revisionMeta" data-i18n="history.selectRevisionCopy">Choose a revision in the timeline to inspect its files.</p>
+        </div>
+      </div>
+
+      <div class="history-summary-grid" id="revisionSummaryGrid"></div>
+
+      <div class="history-files-shell">
+        <div class="history-files-head">
+          <div>
+            <strong data-i18n="history.filesInRevision">Files in revision</strong>
+            <p class="muted-copy" id="revisionNote" data-i18n="history.reasonOrigin">The reason and origin of the revision appear here.</p>
+          </div>
+        </div>
+        <div class="history-files-empty empty-card" id="revisionEmptyState">
+          <strong data-i18n="history.noRevisionData">No revision data</strong>
+          <span data-i18n="history.noRevisionDataCopy">The timeline has not loaded yet or the revision has no items to display.</span>
+        </div>
+        <div class="history-files-table-wrap hidden" id="revisionTableWrap">
+          <table class="history-files-table">
+            <thead>
+              <tr>
+                <th data-i18n="table.name">Name</th>
+                <th data-i18n="table.status">Status</th>
+                <th data-i18n="table.size">Size</th>
+                <th data-i18n="table.action">Action</th>
+              </tr>
+            </thead>
+            <tbody id="revisionEntries"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </section>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script id="bootstrap-data" type="application/json">{{ bootstrap_json | safe }}</script>
+  <script id="history-page-data" type="application/json">{{ history_page_json | safe }}</script>
+  <script src="{{ url_for('static', filename='skill-history.js', v=asset_version) }}" defer></script>
+{% endblock %}

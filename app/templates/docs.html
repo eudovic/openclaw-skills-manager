@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% set active_page = "docs" %}
+
+{% block title %}Open Claw - Documentation Hub{% endblock %}
+
+{% block sidebar_primary_action %}
+  <a
+    class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1c8576] to-[#d97721] py-3 font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-90"
+    href="{{ url_for('index') }}"
+  >
+    <span class="material-symbols-outlined">arrow_back</span>
+    <span class="font-mono text-xs" data-i18n="nav.dashboard">Dashboard</span>
+  </a>
+{% endblock %}
+
+{% block header_search %}
+  <div>
+    <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary">Knowledge base</p>
+    <h1 class="text-3xl font-black tracking-tight text-slate-100 lg:text-4xl">Documentation Hub</h1>
+    <p class="mt-2 max-w-2xl text-sm text-on-surface-variant lg:text-base">
+      An intermediate hub for browsing the OpenClaw documentation before opening the official material.
+    </p>
+  </div>
+{% endblock %}
+
+{% block header_actions %}
+  <div class="flex flex-wrap items-center gap-3">
+    <a
+      class="dashboard-outline-button rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      href="{{ url_for('index') }}"
+    >
+      Back to dashboard
+    </a>
+    <div class="dashboard-avatar">KB</div>
+  </div>
+{% endblock %}
+
+{% block page_content %}
+  <section class="mb-10 grid grid-cols-12 gap-6">
+    <article class="col-span-12 rounded-xl border border-outline-variant/10 bg-surface-container p-8 shadow-[0_0_40px_rgba(192,193,255,0.03)] xl:col-span-8">
+      <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary">OpenClaw docs</p>
+      <h2 class="mb-3 text-3xl font-black tracking-tight text-slate-100">Quick guide for skills, gateway, and operations</h2>
+      <p class="max-w-3xl text-sm leading-7 text-on-surface-variant">
+        This page groups the most useful project links. Use it as an intermediate step to understand creation flow,
+        precedence, gateway configuration, and publication before opening the official documentation.
+      </p>
+    </article>
+
+    <article class="col-span-12 rounded-xl border border-outline-variant/10 bg-gradient-to-br from-surface-container-high to-surface-container p-8 xl:col-span-4">
+      <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-tertiary">Checklist</p>
+      <ul class="space-y-3 text-sm leading-6 text-on-surface-variant">
+        <li>1. Review the `SKILL.md` format.</li>
+        <li>2. Confirm the workspace layout and the `skills/public` path when present.</li>
+        <li>3. Check the gateway token, Basic Auth, and pairing state.</li>
+        <li>4. Only then open the detailed official documentation.</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="mb-10">
+    <div class="mb-6">
+      <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary">Reference set</p>
+      <h2 class="text-2xl font-bold tracking-tight text-slate-100">Organized official documentation</h2>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {% for doc in docs %}
+        <a
+          class="skill-tile"
+          href="{{ doc.url }}"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <div class="skill-tile-head">
+            <div class="skill-tile-icon secondary">
+              <span class="material-symbols-outlined">auto_fix</span>
+            </div>
+            <span class="skill-tile-category secondary">Automation</span>
+          </div>
+          <div class="skill-tile-body">
+            <div>
+              <h3>{{ doc.title }}</h3>
+              <p class="skill-tile-slug">docs.openclaw.ai</p>
+            </div>
+            <p>{{ doc.summary }}</p>
+          </div>
+          <div class="skill-tile-meta">
+            <div>
+              <span>Type</span>
+              <strong>Reference</strong>
+            </div>
+            <div>
+              <span>Access</span>
+              <strong>External</strong>
+            </div>
+            <div class="text-right">
+              <span>Status</span>
+              <strong class="skill-tile-status secondary">OPEN</strong>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel studio-shell">
+    <div class="studio-header">
+      <div>
+        <p class="eyebrow">Operational notes</p>
+        <h2 class="text-2xl font-bold text-slate-100">Context before editing or publishing</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {% for note in notes %}
+        <article class="doc-note">
+          <p class="m-0 text-sm leading-7 text-on-surface-variant">{{ note }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

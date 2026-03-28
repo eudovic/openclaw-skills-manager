@@ -1,0 +1,9 @@
+services:
+  openclaw-skill-studio:
+    volumes:
+      - openclaw-remote-data:${OPENCLAW_REMOTE_DATA_MOUNT:-/remote-data}
+
+volumes:
+  openclaw-remote-data:
+    external: true
+    name: ${OPENCLAW_REMOTE_DATA_VOLUME_NAME}

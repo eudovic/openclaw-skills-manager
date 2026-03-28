@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% set active_page = "dashboard" %}
+
+{% block title %}Open Claw - Skill Intelligence Dashboard{% endblock %}
+
+{% block page_content %}
+  <section class="mb-10 grid grid-cols-12 gap-6">
+    <div class="col-span-12 rounded-xl border border-outline-variant/10 bg-surface-container p-8 shadow-[0_0_40px_rgba(192,193,255,0.03)] xl:col-span-8">
+      <div class="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
+        <div>
+          <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary" data-i18n="dashboard.workspaceConsole">OpenClaw workspace console</p>
+          <h1 class="mb-3 text-4xl font-black tracking-tight text-slate-100 lg:text-5xl" id="appTitle">OpenClaw Skill Studio</h1>
+          <p class="text-sm text-on-surface-variant lg:text-base" id="workspaceSummary"></p>
+          <p class="mt-4 font-mono text-xs uppercase tracking-[0.24em] text-outline" id="skillCounter"></p>
+        </div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="text-center">
+            <span class="metric-value" id="metricTotalSkills">0</span>
+            <span class="metric-label" data-i18n="metrics.totalSkills">Total Skills</span>
+          </div>
+          <div class="text-center">
+            <span class="metric-value metric-value-secondary" id="metricLocalSkills">0</span>
+            <span class="metric-label" data-i18n="metrics.local">Local</span>
+          </div>
+          <div class="text-center">
+            <span class="metric-value metric-value-primary" id="metricRemoteSkills">0</span>
+            <span class="metric-label" data-i18n="metrics.remote">Remote</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-12 flex flex-col justify-center rounded-xl border border-outline-variant/10 bg-gradient-to-br from-surface-container-high to-surface-container p-8 xl:col-span-4">
+      <span class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-tertiary" data-i18n="dashboard.gatewaySync">Gateway Sync</span>
+      <div class="flex items-center gap-3">
+        <div class="dashboard-status-dot" id="gatewayHeroDot"></div>
+        <span class="text-lg font-bold text-slate-100" id="gatewayHeroStatus" data-i18n="dashboard.waitingAuthentication">Waiting for authentication</span>
+      </div>
+      <p class="mt-4 text-sm text-on-surface-variant" data-i18n="dashboard.autoLoginCopy">
+        After app login, the cockpit tries to sign in to OpenClaw automatically using the protected server-side defaults.
+      </p>
+      <div class="mt-4 h-1 w-full overflow-hidden rounded-full bg-surface-container-highest">
+        <div class="dashboard-status-bar" id="gatewayHeroBar"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-10" id="skills-grid">
+    <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary" data-i18n="dashboard.workspaceSkills">Workspace skills</p>
+        <h2 class="text-2xl font-bold tracking-tight text-slate-100" data-i18n="dashboard.skillMatrix">Skill Matrix</h2>
+        <p class="mt-2 text-sm text-on-surface-variant" data-i18n="dashboard.skillMatrixCopy">
+          The grid below combines the local UI mount and the skills exposed by the authenticated remote gateway.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <span class="dashboard-filter-chip dashboard-filter-chip-active" data-i18n="filter.allSkills">All Skills</span>
+        <span class="dashboard-filter-chip" data-i18n="filter.automation">Automation</span>
+        <span class="dashboard-filter-chip" data-i18n="filter.workspace">Workspace</span>
+        <span class="dashboard-filter-chip" data-i18n="filter.gateway">Gateway</span>
+        <button class="dashboard-outline-button rounded-full px-5 py-2 text-xs font-semibold text-on-surface-variant" id="refreshSkillsButton" type="button">
+          <span data-i18n="action.refresh">Refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3" id="skillList"></div>
+  </section>
+{% endblock %}
+
+{% block modal_content %}
+  {% include "_shell_modals.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <script id="bootstrap-data" type="application/json">{{ bootstrap_json | safe }}</script>
+    <script src="{{ url_for('static', filename='app.js', v=asset_version) }}" defer></script>
+{% endblock %}

@@ -1,0 +1,216 @@
+<!doctype html>
+{% set active_page = active_page|default('dashboard') %}
+<html class="dark" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Open Claw - Skill Intelligence Dashboard{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline-variant": "#464554",
+              "surface": "#0b1326",
+              "primary-fixed": "#e1e0ff",
+              "surface-container": "#171f33",
+              "tertiary-fixed": "#ffdcc5",
+              "on-surface": "#dae2fd",
+              "on-tertiary-fixed": "#301400",
+              "tertiary-fixed-dim": "#ffb783",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "on-primary": "#1000a9",
+              "on-error": "#690005",
+              "secondary-fixed-dim": "#4fdbc8",
+              "surface-container-high": "#222a3d",
+              "on-primary-container": "#0d0096",
+              "secondary": "#4fdbc8",
+              "surface-container-highest": "#2d3449",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-tertiary-container": "#452000",
+              "on-primary-fixed": "#07006c",
+              "surface-container-low": "#131b2e",
+              "on-secondary-container": "#003f38",
+              "on-surface-variant": "#c7c4d7",
+              "on-secondary": "#003731",
+              "on-error-container": "#ffdad6",
+              "error-container": "#93000a",
+              "on-background": "#dae2fd",
+              "tertiary-container": "#d97721",
+              "surface-variant": "#2d3449",
+              "primary": "#c0c1ff",
+              "surface-bright": "#31394d",
+              "tertiary": "#ffb783",
+              "secondary-container": "#04b4a2",
+              "error": "#ffb4ab",
+              "secondary-fixed": "#71f8e4",
+              "surface-tint": "#c0c1ff",
+              "outline": "#908fa0",
+              "surface-container-lowest": "#060e20",
+              "inverse-surface": "#dae2fd",
+              "on-tertiary": "#4f2500",
+              "surface-dim": "#0b1326",
+              "on-tertiary-fixed-variant": "#703700",
+              "inverse-on-surface": "#283044",
+              "inverse-primary": "#494bd6",
+              "on-secondary-fixed-variant": "#005048",
+              "background": "#0b1326",
+              "primary-container": "#8083ff",
+              "on-secondary-fixed": "#00201c"
+            },
+            fontFamily: {
+              headline: ["Inter", "sans-serif"],
+              body: ["Inter", "sans-serif"],
+              label: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"]
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px"
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=asset_version) }}" />
+    {% block extra_head %}{% endblock %}
+  </head>
+    <body class="overflow-hidden bg-surface text-on-surface font-body" data-static-root="{{ url_for('static', filename='') }}">
+    <div class="dashboard-ambient dashboard-ambient-a"></div>
+    <div class="dashboard-ambient dashboard-ambient-b"></div>
+    <aside class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-white/5 bg-[#0b1326]/80 px-4 py-8 backdrop-blur-xl">
+      <div class="mb-10 px-2">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-container shadow-[0_0_20px_rgba(192,193,255,0.3)]">
+            <span class="material-symbols-outlined text-on-primary">psychology</span>
+          </div>
+          <div>
+            <h1 class="leading-none font-black text-lg text-slate-50">Open Claw</h1>
+            <p class="mt-1 font-mono text-[10px] tracking-[0.28em] text-secondary" data-i18n="brand.tagline">SKILL INTELLIGENCE</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 space-y-1">
+        <a
+          class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ease-in-out {% if active_page == 'dashboard' %}border-l-4 border-secondary bg-surface-container-high text-primary{% else %}text-slate-500 hover:bg-surface-container hover:text-slate-200{% endif %}"
+          href="{{ url_for('index') }}"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-mono text-xs" data-i18n="nav.dashboard">Dashboard</span>
+        </a>
+        <a
+          class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ease-in-out {% if active_page == 'skills' %}border-l-4 border-secondary bg-surface-container-high text-primary{% else %}text-slate-500 hover:bg-surface-container hover:text-slate-200{% endif %}"
+          href="{{ url_for('index') }}#skills-grid"
+        >
+          <span class="material-symbols-outlined">psychology</span>
+          <span class="font-mono text-xs" data-i18n="nav.skills">Skills</span>
+        </a>
+        <a
+          class="flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ease-in-out {% if active_page == 'docs' %}border-l-4 border-secondary bg-surface-container-high text-primary{% else %}text-slate-500 hover:bg-surface-container hover:text-slate-200{% endif %}"
+          href="{{ url_for('docs_page') }}"
+        >
+          <span class="material-symbols-outlined">menu_book</span>
+          <span class="font-mono text-xs" data-i18n="nav.documentation">Documentation</span>
+        </a>
+      </nav>
+
+      <div class="mt-auto space-y-4">
+        {% block sidebar_primary_action %}
+          <button
+            id="createSkillButton"
+            class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1c8576] to-[#d97721] py-3 font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-90"
+            type="button"
+          >
+            <span class="material-symbols-outlined">add</span>
+            <span class="font-mono text-xs" data-i18n="action.newSkill">New Skill</span>
+          </button>
+        {% endblock %}
+
+        <div class="space-y-3 border-t border-outline-variant/20 pt-6">
+          <a class="flex items-center gap-3 px-4 py-2 text-slate-500 transition-colors hover:text-slate-300" href="{{ url_for('docs_page') }}">
+            <span class="material-symbols-outlined text-sm">menu_book</span>
+            <span class="font-mono text-[10px]" data-i18n="nav.documentation">Documentation</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-shell-main ml-64 bg-surface-container-low px-6 pb-6 pt-0 lg:px-8 lg:pb-8 lg:pt-0">
+      <header class="app-shell-header flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {% block header_search %}
+          <div class="relative w-full max-w-xl">
+            <div class="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+              <span class="material-symbols-outlined text-on-surface-variant">search</span>
+            </div>
+            <input
+              id="skillFilterInput"
+              class="dashboard-search w-full rounded-xl border-none bg-surface-container-lowest py-3 pl-12 pr-4 text-sm text-on-surface placeholder:text-outline-variant/60 focus:ring-1 focus:ring-primary/40"
+              data-i18n-placeholder="search.skillsPlaceholder"
+              placeholder="Search workspace/public/skills..."
+              type="search"
+            />
+          </div>
+        {% endblock %}
+
+        <div class="header-actions-cluster">
+          {% block header_actions %}
+            <div class="flex flex-wrap items-center gap-3 lg:gap-6">
+              <div class="dashboard-status-pill" id="gatewayStatusPill" data-i18n="status.gatewayDisconnected">Gateway disconnected</div>
+              <button
+                id="reconnectButton"
+                class="dashboard-outline-button rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-slate-100 transition-colors hover:bg-white/10"
+                type="button"
+                data-i18n="action.connect"
+              >
+                Connect
+              </button>
+              <div class="flex items-center gap-2 text-on-surface-variant">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="material-symbols-outlined">help_outline</span>
+              </div>
+              <div class="dashboard-avatar">OC</div>
+            </div>
+          {% endblock %}
+          <div class="locale-shell" id="localeMenuShell">
+            <button
+              class="locale-trigger"
+              id="localeMenuButton"
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              data-i18n-title="common.language"
+              title="Language"
+            >
+              <img class="locale-flag" id="localeCurrentFlag" alt="" aria-hidden="true" />
+              <span class="sr-only" id="localeCurrentLabel">English</span>
+              <span class="material-symbols-outlined locale-chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="locale-menu hidden" id="localeMenu" role="menu" aria-label="Language"></div>
+            <select id="localeSelect" class="sr-only" aria-hidden="true" tabindex="-1"></select>
+          </div>
+        </div>
+      </header>
+
+      <div class="app-shell-content px-6 pb-6 pt-0 lg:px-8 lg:pb-8 lg:pt-0">
+        {% block page_content %}{% endblock %}
+      </div>
+    </main>
+
+    {% block modal_content %}{% endblock %}
+    <script src="{{ url_for('static', filename='i18n.js', v=asset_version) }}" defer></script>
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

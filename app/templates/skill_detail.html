@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% set active_page = "skills" %}
+
+{% block title %}Open Claw - Skill Navigator{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/theme/material-darker.min.css" />
+{% endblock %}
+
+{% block header_search %}
+  <div class="flex flex-col">
+    <div class="mb-1 flex items-center gap-2 font-mono text-[11px] text-on-surface-variant">
+      <span data-i18n="nav.skills">Skills</span>
+      <span class="material-symbols-outlined text-xs">chevron_right</span>
+      <span class="text-secondary" id="skillBreadcrumb">...</span>
+      <span class="material-symbols-outlined text-xs" id="pathChevron">chevron_right</span>
+      <span id="selectedPathBadge">root</span>
+    </div>
+    <h2 class="text-xl font-bold tracking-tight text-slate-100 lg:text-2xl">
+      <span id="skillPageTitle">{{ skill_slug }}</span>
+      <span class="ml-2 text-sm font-normal text-on-surface-variant/60" id="skillPageRoot"></span>
+    </h2>
+  </div>
+{% endblock %}
+
+{% block header_actions %}
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="dashboard-status-pill" id="gatewayStatusPill" data-i18n="status.gatewayDisconnected">Gateway disconnected</div>
+    <button
+      id="reconnectButton"
+      class="dashboard-outline-button rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      type="button"
+      data-i18n="action.connect"
+    >
+      Connect
+    </button>
+    <button
+      class="dashboard-outline-button rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      id="toggleDirectoryButton"
+      type="button"
+      data-i18n="action.showFolders"
+    >
+      Show folders
+    </button>
+    <button
+      class="dashboard-outline-button rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-slate-100 transition-colors hover:bg-white/10"
+      id="newFolderButton"
+      type="button"
+      data-i18n="action.newFolder"
+    >
+      New folder
+    </button>
+    <button
+      class="rounded-lg bg-gradient-to-br from-primary to-primary-container px-4 py-2.5 text-sm font-bold text-on-primary shadow-lg shadow-primary/10 transition-all hover:brightness-110"
+      id="newFileButton"
+      type="button"
+      data-i18n="action.newFile"
+    >
+      New file
+    </button>
+  </div>
+{% endblock %}
+
+{% block page_content %}
+  <section class="mb-5 rounded-xl border border-outline-variant/10 bg-surface-container px-5 py-4 shadow-[0_0_40px_rgba(192,193,255,0.03)]">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.28em] text-secondary" data-i18n="skill.cockpit">Skill cockpit</p>
+        <p class="max-w-3xl text-sm leading-7 text-on-surface-variant" id="pageStatus">
+          Select a folder or file to browse the skill. Local files can be created, edited, renamed, and removed here.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-[0.22em] text-on-surface-variant">
+        <span class="rounded-full border border-outline-variant/10 bg-surface-container-high px-3 py-1" id="syncStatusBadge" data-i18n="status.noPendingSync">No pending sync</span>
+        <span class="rounded-full border border-outline-variant/10 bg-surface-container-high px-3 py-1" id="skillModeBadge" data-i18n="status.local">Local</span>
+        <span class="rounded-full border border-outline-variant/10 bg-surface-container-high px-3 py-1" id="selectionTypeBadge" data-i18n="status.noSelection">No selection</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="skill-workbench flex h-[calc(100vh-15rem)] min-h-[620px] overflow-hidden rounded-xl border border-outline-variant/10 bg-surface-container-low/10" id="skillWorkbench">
+    <div class="skill-loading-overlay" id="skillLoadingOverlay">
+      <div class="skill-loading-card">
+        <div class="skill-loading-spinner" aria-hidden="true"></div>
+        <p class="skill-loading-eyebrow" data-i18n="loading.loading">Loading</p>
+        <strong class="skill-loading-title" data-i18n="loading.preparingSkill">Preparing skill</strong>
+        <p class="skill-loading-copy" id="skillLoadingCopy" data-i18n="loading.preparingCopy">Reading the tree, restoring the working copy, and opening the initial file.</p>
+      </div>
+    </div>
+    <div class="skill-main-shell flex min-w-0 flex-1 bg-surface-container-low/10" id="skillMainShell">
+      <button class="skill-directory-expand hidden" id="expandDirectoryButton" type="button">
+        <span class="material-symbols-outlined text-sm">left_panel_open</span>
+        <span data-i18n="skill.structure">Structure</span>
+      </button>
+      <div class="skill-directory-panel shrink-0 overflow-x-auto border-r border-outline-variant/5" id="directoryPanel">
+        <div class="flex shrink-0" id="directoryColumns"></div>
+      </div>
+      <div class="skill-pane-resizer" id="directoryResizeHandle" role="separator" aria-orientation="vertical" tabindex="0"></div>
+
+      <section class="skill-editor-section flex min-w-0 min-h-0 flex-1 flex-col bg-surface-container-lowest/50" id="editorSection">
+        <div class="flex items-center justify-between border-b border-outline-variant/10 bg-surface-container-low/50 px-6 py-4">
+          <div>
+            <p class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant" data-i18n="section.editor">Editor</p>
+            <h3 class="mt-1 text-base font-semibold text-slate-100" id="editorFileTitle" data-i18n="dashboard.selectSkill">Select a skill</h3>
+            <p class="mt-1 text-sm text-on-surface-variant" id="editorFileMeta" data-i18n="editor.chooseFileOrCreate">Choose a text file to edit or create a new item.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="hidden items-center gap-2" id="editorModeToolbar">
+              <button class="ghost-button small-button" id="editorModeEditButton" type="button" data-i18n="action.edit">Edit</button>
+              <button class="ghost-button small-button" id="editorModePreviewButton" type="button" data-i18n="action.preview">Preview</button>
+            </div>
+            <button class="ghost-button small-button" id="detachEditorButton" type="button" data-i18n="action.detach">Detach</button>
+            <div class="dirty-indicator" id="dirtyIndicator" data-i18n="status.noChanges">No changes</div>
+            <button class="ghost-button small-button" id="formatFileButton" type="button" data-i18n="action.format">Format</button>
+            <button class="ghost-button small-button" id="reloadFileButton" type="button" data-i18n="action.reload">Reload</button>
+            <button class="primary-button small-button" id="saveFileButton" type="button" data-i18n="action.saveFile">Save file</button>
+          </div>
+        </div>
+
+        <div class="hidden min-h-0 flex flex-1 flex-col p-6" id="editorPane">
+          <div class="editor-surface" id="editorSurface">
+            <textarea
+              id="fileEditor"
+              class="h-full min-h-[420px] w-full rounded-xl border border-outline-variant/10 bg-[#060e20] p-5 font-mono text-sm text-on-surface outline-none focus:border-primary/30"
+              data-i18n-placeholder="editor.selectFilePlaceholder"
+              placeholder="Select a file to edit."
+              spellcheck="false"
+            ></textarea>
+            <div class="markdown-preview hidden" id="markdownPreview"></div>
+          </div>
+          <div class="editor-height-resizer" id="editorHeightResizer" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize editor height"></div>
+        </div>
+
+        <div class="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center" id="editorEmptyState">
+          <div class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-surface-container-high">
+            <span class="material-symbols-outlined text-3xl text-on-surface-variant">upload_file</span>
+          </div>
+          <p class="mb-1 text-base font-medium text-on-surface" data-i18n="editor.selectFileToInteract">Select a file to interact with</p>
+          <p class="mb-6 max-w-md text-sm text-on-surface-variant" id="emptyStateCopy" data-i18n="editor.emptyCopy">
+            Browse the columns on the left to open an existing file or create a new item inside the skill.
+          </p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <span class="rounded border-l-2 border-secondary bg-surface-container-highest px-2 py-1 font-mono text-[10px] text-on-surface-variant">.py</span>
+            <span class="rounded border-l-2 border-primary bg-surface-container-highest px-2 py-1 font-mono text-[10px] text-on-surface-variant">.js</span>
+            <span class="rounded border-l-2 border-tertiary bg-surface-container-highest px-2 py-1 font-mono text-[10px] text-on-surface-variant">.md</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="hidden w-80 shrink-0 flex-col border-l border-outline-variant/5 bg-surface-container-low lg:flex">
+      <div class="overflow-y-auto p-6">
+        <div class="relative mb-6 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-surface-container-high">
+          <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-secondary/10 opacity-50"></div>
+          <span class="material-symbols-outlined relative z-10 text-6xl text-primary drop-shadow-lg" id="detailIcon">folder</span>
+        </div>
+
+        <div class="mb-8">
+          <h3 class="mb-1 font-mono text-lg font-bold text-slate-100" id="detailTitle" data-i18n="detail.noneSelected">No item selected</h3>
+          <p class="flex items-center gap-2 text-xs text-on-surface-variant" id="detailMeta">
+            <span class="h-2 w-2 rounded-full bg-secondary"></span>
+            <span data-i18n="detail.awaitSelection">Waiting for a selection</span>
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono uppercase tracking-tighter text-on-surface-variant" data-i18n="detail.created">Created</span>
+              <span class="font-mono text-on-surface" id="detailCreated">-</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono uppercase tracking-tighter text-on-surface-variant" data-i18n="detail.modified">Modified</span>
+              <span class="font-mono text-on-surface" id="detailModified">-</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono uppercase tracking-tighter text-on-surface-variant" data-i18n="detail.permissions">Permissions</span>
+              <span class="rounded bg-surface-container-highest px-2 py-0.5 font-mono text-on-surface" id="detailPermissions">-</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono uppercase tracking-tighter text-on-surface-variant" data-i18n="detail.owner">Owner</span>
+              <span class="font-mono text-on-surface" id="detailOwner">-</span>
+            </div>
+          </div>
+
+          <div class="border-t border-outline-variant/10 pt-6">
+            <h4 class="mb-3 text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant" data-i18n="detail.quickActions">Quick Actions</h4>
+            <div class="grid grid-cols-2 gap-2">
+              <button class="ghost-button small-button" id="syncSkillButton" type="button" data-i18n="action.syncThisSkill">Sync this skill</button>
+              <button class="ghost-button small-button" id="openManifestButton" type="button">SKILL.md</button>
+              <a
+                class="ghost-button small-button flex items-center justify-center"
+                href="{{ url_for('skill_history_page', skill_slug=skill_slug) }}"
+                data-i18n="action.history"
+              >
+                History
+              </a>
+              <button class="ghost-button small-button" id="downloadFileButton" type="button" data-i18n="action.download">Download</button>
+              <button class="ghost-button small-button" id="renameNodeButton" type="button" data-i18n="action.rename">Rename</button>
+              <button class="ghost-button small-button danger-button" id="deleteNodeButton" type="button" data-i18n="action.delete">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+  <div class="editor-detach-backdrop hidden" id="editorDetachBackdrop"></div>
+{% endblock %}
+
+{% block modal_content %}
+  {% include "_shell_modals.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+  <script id="bootstrap-data" type="application/json">{{ bootstrap_json | safe }}</script>
+  <script id="skill-page-data" type="application/json">{{ skill_page_json | safe }}</script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/lib/codemirror.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/addon/selection/active-line.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/meta.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/shell/shell.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/css/css.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/xml/xml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.18/mode/yaml/yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <script src="{{ url_for('static', filename='skill-detail.js', v=asset_version) }}" defer></script>
+{% endblock %}

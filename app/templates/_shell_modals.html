@@ -1,0 +1,202 @@
+<div class="overlay" id="appLoginOverlay">
+  <div class="panel login-card">
+    <p class="eyebrow" data-i18n="login.appAccess">App access</p>
+    <h2 data-i18n="login.signInApp">Sign in to the app</h2>
+    <p class="muted-copy" data-i18n="login.appProtectionCopy">
+      This layer protects the public UI before access to the gateway and the workspace.
+    </p>
+    <form id="appLoginForm" class="login-form">
+      <label class="input-wrap">
+        <span data-i18n="login.user">User</span>
+        <input id="appLoginUserInput" type="text" placeholder="user@company.com" autocomplete="username" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="login.password">Password</span>
+        <input id="appLoginPassInput" type="password" placeholder="Application password" autocomplete="current-password" />
+      </label>
+      <div class="login-actions">
+        <button class="primary-button" type="submit" data-i18n="action.signIn">Sign in</button>
+      </div>
+      <p class="login-error" id="appLoginError"></p>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="loginOverlay">
+  <div class="panel login-card">
+    <p class="eyebrow" data-i18n="login.gatewayAccess">Gateway access</p>
+    <h2 data-i18n="login.connectSkillCockpit">Connect the skill cockpit</h2>
+    <p class="muted-copy" data-i18n="login.gatewayCopy">
+      Fill in the OpenClaw DNS/IP host and, if needed, override the gateway token and Basic Auth. Secrets are no longer preset on the client.
+    </p>
+    <p class="muted-copy" id="gatewayDefaultsHint"></p>
+    <form id="loginForm" class="login-form">
+      <label class="input-wrap">
+        <span data-i18n="login.gatewayUrl">Gateway URL</span>
+        <input id="gatewayUrlInput" type="text" placeholder="ws://127.0.0.1:18789" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="login.gatewayToken">Gateway token</span>
+        <input id="gatewayTokenInput" type="password" placeholder="Gateway token" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="login.edgeBasicUser">Edge basic user</span>
+        <input id="gatewayBasicUserInput" type="text" placeholder="Edge / proxy user" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="login.edgeBasicPass">Edge basic pass</span>
+        <input id="gatewayBasicPassInput" type="password" placeholder="Edge / proxy password" />
+      </label>
+      <div class="meta-strip">
+        <div>
+          <span class="meta-label" data-i18n="login.workspace">Workspace</span>
+          <strong id="loginWorkspace"></strong>
+        </div>
+        <div>
+          <span class="meta-label" data-i18n="login.skills">Skills</span>
+          <strong id="loginSkillsRoot"></strong>
+        </div>
+      </div>
+      <div class="login-actions">
+        <button class="ghost-button" id="offlineModeButton" type="button" data-i18n="action.openOffline">Open offline</button>
+        <button class="primary-button" type="submit" data-i18n="action.signIn">Sign in</button>
+      </div>
+      <p class="login-error" id="loginError"></p>
+    </form>
+  </div>
+</div>
+
+<dialog id="createSkillDialog" class="dialog">
+  <form method="dialog" class="dialog-card" id="createSkillForm">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow" data-i18n="dialog.newSkill">New skill</p>
+        <h3 data-i18n="dialog.buildSkillStructure">Build the skill structure</h3>
+      </div>
+      <button class="ghost-button small-button" value="cancel" type="submit" data-i18n="action.close">Close</button>
+    </div>
+    <div class="form-grid">
+      <label class="input-wrap">
+        <span data-i18n="dialog.folderSlug">Folder slug</span>
+        <input name="slug" type="text" placeholder="my-skill" required />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="dialog.internalName">name (snake_case)</span>
+        <input name="name" type="text" placeholder="minha_skill" required />
+      </label>
+      <label class="input-wrap full-width">
+        <span data-i18n="common.description">Description</span>
+        <input name="description" type="text" placeholder="What the skill does and when to use it" required />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="dialog.humanTitle">Human title</span>
+        <input name="title" type="text" placeholder="My Skill" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="dialog.template">Template</span>
+        <select name="template" id="templateSelect"></select>
+      </label>
+      <label class="input-wrap">
+        <span>homepage</span>
+        <input name="homepage" type="url" placeholder="https://..." />
+      </label>
+      <label class="input-wrap">
+        <span>emoji</span>
+        <input name="emoji" type="text" placeholder="Optional" />
+      </label>
+      <label class="input-wrap">
+        <span data-i18n="dialog.capability">Capability</span>
+        <input name="capability" type="text" placeholder="CRM integration, deployment playbook..." />
+      </label>
+      <label class="input-wrap">
+        <span>primaryEnv</span>
+        <input name="primaryEnv" type="text" placeholder="SERVICE_API_KEY" />
+      </label>
+      <label class="input-wrap">
+        <span>requires.bins</span>
+        <input name="requiresBins" type="text" placeholder="uv, jq" />
+      </label>
+      <label class="input-wrap">
+        <span>requires.env</span>
+        <input name="requiresEnv" type="text" placeholder="API_KEY, TOKEN" />
+      </label>
+      <label class="input-wrap">
+        <span>requires.config</span>
+        <input name="requiresConfig" type="text" placeholder="browser.enabled" />
+      </label>
+    </div>
+    <div class="check-grid">
+      <label class="checkbox-wrap">
+        <input name="userInvocable" type="checkbox" checked />
+        <span>user-invocable</span>
+      </label>
+      <label class="checkbox-wrap">
+        <input name="disableModelInvocation" type="checkbox" />
+        <span>disable-model-invocation</span>
+      </label>
+    </div>
+    <div class="inline-docs" id="creationDocs"></div>
+    <div class="login-actions">
+      <button class="ghost-button" value="cancel" type="submit" data-i18n="action.cancel">Cancel</button>
+      <button class="primary-button" id="submitCreateSkillButton" value="default" type="submit" data-i18n="action.createSkill">Create skill</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="pathDialog" class="dialog">
+  <form method="dialog" class="dialog-card" id="pathDialogForm">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow" id="pathDialogEyebrow">File</p>
+        <h3 id="pathDialogTitle">Create item</h3>
+      </div>
+      <button class="ghost-button small-button" value="cancel" type="submit" data-i18n="action.close">Close</button>
+    </div>
+    <label class="input-wrap">
+      <span id="pathDialogLabel">Name</span>
+      <input id="pathDialogInput" type="text" required />
+    </label>
+    <p class="muted-copy" id="pathDialogHint"></p>
+    <div class="login-actions">
+      <button class="ghost-button" value="cancel" type="submit" data-i18n="action.cancel">Cancel</button>
+      <button class="primary-button" id="pathDialogSubmitButton" value="default" type="submit" data-i18n="action.confirm">Confirm</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="deleteDialog" class="dialog">
+  <form method="dialog" class="dialog-card" id="deleteDialogForm">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow" data-i18n="delete.deleteItem">Delete item</p>
+        <h3 id="deleteDialogTitle" data-i18n="delete.deleteWorkingCopy">Delete from the working copy</h3>
+      </div>
+      <button class="ghost-button small-button" value="cancel" type="submit" data-i18n="action.close">Close</button>
+    </div>
+    <div class="dialog-entity">
+      <span class="meta-label" data-i18n="delete.selectedItem">Selected item</span>
+      <strong id="deleteDialogTarget">-</strong>
+      <p class="muted-copy" id="deleteDialogCopy" data-i18n="delete.copy">
+        The deletion is only staged in the Studio working copy. You can restore it from history before publishing the skill.
+      </p>
+    </div>
+    <div class="dialog-callout" data-i18n="delete.callout">
+      This deletion is not applied to the final workspace or the remote target at this step. It only becomes part of the skill's local revision until publication.
+    </div>
+    <label class="input-wrap">
+      <span data-i18n="delete.reasonOptional">Reason for deletion (optional)</span>
+      <textarea
+        id="deleteDialogReason"
+        rows="4"
+        data-i18n-placeholder="delete.reasonPlaceholder"
+        placeholder="Example: legacy file replaced by another flow; temporary folder is no longer needed..."
+      ></textarea>
+    </label>
+    <div class="login-actions">
+      <button class="ghost-button" value="cancel" type="submit" data-i18n="action.cancel">Cancel</button>
+      <button class="primary-button danger-button" id="deleteDialogSubmitButton" value="default" type="submit">
+        <span data-i18n="action.deleteFromWorkingCopy">Delete from working copy</span>
+      </button>
+    </div>
+  </form>
+</dialog>

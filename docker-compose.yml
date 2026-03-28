@@ -1,0 +1,20 @@
+services:
+  openclaw-skill-studio:
+    container_name: openclaw-skill-studio
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    network_mode: bridge
+    ports:
+      - "${PORT:-8765}:${PORT:-8765}"
+    volumes:
+      - ${OPENCLAW_WORKSPACE_HOST_PATH:-.}:${OPENCLAW_WORKSPACE_ROOT:-/workspace}
+      - studio-data:${OPENCLAW_STUDIO_DATA_ROOT:-/studio-data}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  studio-data:
